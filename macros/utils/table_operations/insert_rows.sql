@@ -162,7 +162,7 @@
         {%- if value is number -%}
             {{- value -}}
         {%- elif value is string and data_type == 'timestamp' -%}
-            {{- elementary.edr_cast_as_timestamp(elementary.edr_quote(value)) -}}
+            {{- elementary.edr_cast_as_timestamp(elementary.edr_quote(value)) -duck}}
         {%- elif value is string -%}
             '{{- elementary.escape_special_chars(value) -}}'
         {%- elif value is mapping or value is sequence -%}
@@ -173,4 +173,9 @@
     {%- else -%}
         NULL
     {%- endif -%}
+{%- endmacro -%}
+
+{# FIX: Duckdb escape single quote #}
+{%- macro duckdb__escape_special_chars(string_value) -%}
+    {{- return(string_value | replace("\\", "\\\\") | replace("'", "''") | replace("\n", "\\n") | replace("\r", "\\r")) -}}
 {%- endmacro -%}
