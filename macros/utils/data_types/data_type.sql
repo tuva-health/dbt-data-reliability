@@ -19,6 +19,9 @@
     {% do return("BOOL") %}
 {% endmacro %}
 
+{% macro fabric__edr_type_bool() %}
+    {% do return("bit") %}
+{% endmacro %}
 
 {%- macro edr_type_string() -%}
     {{ return(adapter.dispatch('edr_type_string', 'elementary')()) }}
@@ -50,6 +53,11 @@
     {# Default max string size in Bigquery is 65K #}
     {% do return("string") %}
 {% endmacro %}
+
+{% macro fabric__edr_type_string() %}
+    {% do return("varchar(4096)") %}
+{% endmacro %}
+
 
 {% macro spark__edr_type_string() %}
     {% do return("string") %}
@@ -155,4 +163,8 @@
 
 {% macro trino__edr_type_timestamp() %}
     timestamp(6)
+{% endmacro %}
+
+{% macro fabric__edr_type_timestamp() %}
+    datetime2(2)
 {% endmacro %}
