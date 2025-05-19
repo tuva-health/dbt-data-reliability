@@ -220,7 +220,6 @@
     with unique_timestamps as (
         select distinct monitored_table_timestamp_column as timestamp_val
         from partially_time_filtered_monitored_table
-        order by 1
     ),
 
     -- compute freshness for every update as the time difference from the previous update

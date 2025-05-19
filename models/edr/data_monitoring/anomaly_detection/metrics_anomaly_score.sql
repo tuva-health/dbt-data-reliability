@@ -90,8 +90,6 @@ metrics_anomaly_score as (
         training_start,
         training_end,
         training_set_size
-    order by bucket_end desc
-
 
 ),
 
@@ -116,8 +114,8 @@ final as (
         updated_at,
         case
             when abs(anomaly_score) > {{ elementary.get_config_var('anomaly_sensitivity') }}
-                then {{ elementary.edr_bool_true() }}
-                else {{ elementary.edr_bool_false() }}
+                then {{ elementary.edr_evaluate_bool(true) }}
+                else {{ elementary.edr_evaluate_bool(false) }}
             end
         as is_anomaly
     from metrics_anomaly_score
