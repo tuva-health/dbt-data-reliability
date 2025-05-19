@@ -17,9 +17,6 @@ vars:
   mute_ensure_materialization_override: true
 
 
-models:
-  +enabled: "{{ target.type != 'fabric' }}"
-
 target-path: "target" # directory which will store compiled SQL files
 clean-targets: # directories to be removed by `dbt clean`
   - "target"
