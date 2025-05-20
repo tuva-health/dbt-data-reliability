@@ -75,8 +75,6 @@ class TestFreshnessAnomalies:
         if target == "redshift" and config.period == "month":
             pytest.skip("Redshift does not support monthly time buckets.")
 
-    # Anomalies currently not supported on ClickHouse
-    @pytest.mark.skip_targets(["clickhouse"])
     def test_anomalyless_table(
         self,
         test_id: str,
@@ -96,8 +94,6 @@ class TestFreshnessAnomalies:
         )
         assert result["status"] == "pass"
 
-    # Anomalies currently not supported on ClickHouse
-    @pytest.mark.skip_targets(["clickhouse"])
     def test_stop(
         self,
         test_id: str,
@@ -118,8 +114,6 @@ class TestFreshnessAnomalies:
         )
         assert result["status"] == "fail"
 
-    # Anomalies currently not supported on ClickHouse
-    @pytest.mark.skip_targets(["clickhouse"])
     def test_stop_with_delay(
         self,
         test_id: str,
@@ -142,8 +136,6 @@ class TestFreshnessAnomalies:
         )
         assert result["status"] == "pass"
 
-    # Anomalies currently not supported on ClickHouse
-    @pytest.mark.skip_targets(["clickhouse"])
     def test_slower_rate(
         self,
         test_id: str,
@@ -171,8 +163,6 @@ class TestFreshnessAnomalies:
         )
         assert result["status"] == "fail"
 
-    # Anomalies currently not supported on ClickHouse
-    @pytest.mark.skip_targets(["clickhouse"])
     def test_faster_rate(
         self,
         test_id: str,

@@ -1,8 +1,4 @@
 {% macro get_anomaly_scores_query(test_metrics_table_relation, model_relation, test_configuration, metric_names, column_name = none, columns_only = false, metric_properties = none, data_monitoring_metrics_table=none) %}
-    {{ return(adapter.dispatch('get_anomaly_scores_query', 'elementary')(test_metrics_table_relation, model_relation, test_configuration, metric_names, column_name, columns_only, metric_properties, data_monitoring_metrics_table)) }}
-{% endmacro %}
-
-{% macro default__get_anomaly_scores_query(test_metrics_table_relation, model_relation, test_configuration, metric_names, column_name = none, columns_only = false, metric_properties = none, data_monitoring_metrics_table=none) %}
     {%- set model_graph_node = elementary.get_model_graph_node(model_relation) %}
     {%- set full_table_name = elementary.model_node_to_full_name(model_graph_node) %}
     {%- set test_execution_id = elementary.get_test_execution_id() %}
@@ -168,7 +164,7 @@
                 bucket_duration_hours,
                 updated_at,
                 avg(metric_value) over (partition by metric_name, full_table_name, column_name, dimension, dimension_value, bucket_seasonality order by bucket_end asc rows between unbounded preceding and current row) as training_avg,
-                {{ elementary.standard_deviation('metric_value') }} over (partition by metric_name, full_table_name, column_name, dimension, dimension_value, bucket_seasonality order by bucket_end asc rows between unbounded preceding and current row) as training_stddev,
+                stddev(metric_value) over (partition by metric_name, full_table_name, column_name, dimension, dimension_value, bucket_seasonality order by bucket_end asc rows between unbounded preceding and current row) as training_stddev,
                 count(metric_value) over (partition by metric_name, full_table_name, column_name, dimension, dimension_value, bucket_seasonality order by bucket_end asc rows between unbounded preceding and current row) as training_set_size,
                 last_value(bucket_end) over (partition by metric_name, full_table_name, column_name, dimension, dimension_value, bucket_seasonality order by bucket_end asc rows between unbounded preceding and current row) training_end,
                 first_value(bucket_end) over (partition by metric_name, full_table_name, column_name, dimension, dimension_value, bucket_seasonality order by bucket_end asc rows between unbounded preceding and current row) as training_start
@@ -230,4 +226,38 @@
 
     {% endset %}
     {{ return(anomaly_scores_query) }}
+{% endmacro %}
+
+{% macro get_negative_value_supported_metrics() %}
+    {% do return(["min", "max", "average", "standard_deviation", "variance", "sum"]) %}
+{% endmacro %}
+
+{% macro get_limit_metric_values(test_configuration) %}
+    {%- set min_val -%}
+      ((-1) * {{ test_configuration.anomaly_sensitivity }} * training_stddev + training_avg)
+    {%- endset -%}
+
+    {% if test_configuration.ignore_small_changes.drop_failure_percent_threshold %}
+      {%- set drop_avg_threshold -%}
+        ((1 - {{ test_configuration.ignore_small_changes.drop_failure_percent_threshold }}/100.0) * training_avg)
+      {%- endset -%}
+      {%- set min_val -%}
+        {{ elementary.arithmetic_min(drop_avg_threshold, min_val) }}
+      {%- endset -%}
+    {% endif %}
+
+    {%- set max_val -%}
+      ({{ test_configuration.anomaly_sensitivity }} * training_stddev + training_avg)
+    {%- endset -%}
+
+    {% if test_configuration.ignore_small_changes.spike_failure_percent_threshold %}
+      {%- set spike_avg_threshold -%}
+        ((1 + {{ test_configuration.ignore_small_changes.spike_failure_percent_threshold }}/100.0) * training_avg)
+      {%- endset -%}
+      {%- set max_val -%}
+        {{ elementary.arithmetic_max(spike_avg_threshold, max_val) }}
+      {%- endset -%}
+    {% endif %}
+
+    {{ return({"min_metric_value": min_val, "max_metric_value": max_val}) }}
 {% endmacro %}

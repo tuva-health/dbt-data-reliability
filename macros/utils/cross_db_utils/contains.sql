@@ -31,15 +31,3 @@
         else false end
     {%- endif %}
 {% endmacro %}
-
-{% macro athena__contains(string, string_to_search, case_sensitive) %}
-    {%- if case_sensitive %}
-        case when
-            {{ string }} like '%{{ string_to_search }}%' then true
-        else false end
-    {%- else %}
-        case when
-            lower({{ string }}) like lower('%{{ string_to_search }}%') then true
-        else false end
-    {%- endif %}
-{% endmacro %}

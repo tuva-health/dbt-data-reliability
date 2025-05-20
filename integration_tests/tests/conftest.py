@@ -2,22 +2,18 @@ import shutil
 from pathlib import Path
 from tempfile import mkdtemp
 
+import env
 import pytest
 from dbt.version import __version__ as dbt_version
 from dbt_project import DbtProject
-from env import Environment
-from logger import get_logger
 from packaging import version
 
 DBT_PROJECT_PATH = Path(__file__).parent.parent / "dbt_project"
-
-logger = get_logger(__name__)
 
 
 def pytest_addoption(parser):
     parser.addoption("--target", action="store", default="postgres")
     parser.addoption("--skip-init", action="store_true", default=False)
-    parser.addoption("--clear-on-end", action="store_true", default=False)
 
 
 @pytest.fixture(scope="session")
@@ -36,22 +32,9 @@ def project_dir_copy():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def init_tests_env(
-    target: str, skip_init: bool, clear_on_end: bool, project_dir_copy: str
-):
-    env = Environment(target, project_dir_copy)
+def init_tests_env(target, skip_init, project_dir_copy: str):
     if not skip_init:
-        logger.info("Initializing test environment")
-        env.clear()
-        env.init()
-        logger.info("Initialization complete")
-
-    yield
-
-    if clear_on_end:
-        logger.info("Clearing tests environment")
-        env.clear()
-        logger.info("Clearing complete")
+        env.init(target, project_dir_copy)
 
 
 @pytest.fixture(autouse=True)
@@ -95,13 +78,8 @@ def target(request) -> str:
 
 
 @pytest.fixture(scope="session")
-def skip_init(request) -> bool:
+def skip_init(request) -> str:
     return request.config.getoption("--skip-init")
-
-
-@pytest.fixture(scope="session")
-def clear_on_end(request) -> bool:
-    return request.config.getoption("--clear-on-end")
 
 
 @pytest.fixture

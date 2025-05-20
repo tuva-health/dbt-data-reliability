@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
 
-import pytest
 from data_generator import DATE_FORMAT, generate_dates
 from dbt_project import DbtProject
 
@@ -29,8 +28,6 @@ def test_anomalyless_all_columns_anomalies(test_id: str, dbt_project: DbtProject
     assert all([res["status"] == "pass" for res in test_results])
 
 
-# Anomalies currently not supported on ClickHouse
-@pytest.mark.skip_targets(["clickhouse"])
 def test_anomalous_all_columns_anomalies(test_id: str, dbt_project: DbtProject):
     utc_today = datetime.utcnow().date()
     test_date, *training_dates = generate_dates(base_date=utc_today - timedelta(1))
@@ -55,8 +52,6 @@ def test_anomalous_all_columns_anomalies(test_id: str, dbt_project: DbtProject):
     assert col_to_status == {"superhero": "fail", TIMESTAMP_COLUMN: "pass"}
 
 
-# Anomalies currently not supported on ClickHouse
-@pytest.mark.skip_targets(["clickhouse"])
 def test_all_columns_anomalies_with_where_expression(
     test_id: str, dbt_project: DbtProject
 ):

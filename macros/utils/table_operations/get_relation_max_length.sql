@@ -30,15 +30,3 @@
 {% macro trino__get_relation_max_name_length(temporary, relation, sql_query) %}
     {{ return(128) }}
 {% endmacro %}
-
-{% macro fabric__get_relation_max_name_length(temporary, relation, sql_query) %}
-    {{ return(64) }}
-{% endmacro %}
-
-{% macro sqlserver__get_relation_max_name_length(temporary, relation, sql_query) %}
-    {{ return(64) }}
-{% endmacro %}
-
-{% macro clickhouse__get_relation_max_name_length(temporary, relation, sql_query) %}
-    {{ return(128) }}
-{% endmacro %}

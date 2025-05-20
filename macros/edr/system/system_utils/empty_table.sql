@@ -54,10 +54,6 @@
 {% endmacro %}
 
 {% macro empty_data_monitoring_metrics(with_created_at=true) %}
-    {{ return(adapter.dispatch('empty_data_monitoring_metrics', 'elementary')(with_created_at)) }}
-{% endmacro %}
-
-{% macro default__empty_data_monitoring_metrics(with_created_at=true) %}
     {% set columns = [('id','string'),
                       ('full_table_name','string'),
                       ('column_name','string'),
@@ -79,27 +75,6 @@
     {{ elementary.empty_table(columns) }}
 {% endmacro %}
 
-{% macro clickhouse__empty_data_monitoring_metrics(with_created_at=true) %}
-    {% set columns = [('id','string'),
-                      ('full_table_name','nullable(string)'),
-                      ('column_name','nullable(string)'),
-                      ('metric_name','nullable(string)'),
-                      ('metric_type','nullable(string)'),
-                      ('metric_value','nullable(float)'),
-                      ('source_value','nullable(string)'),
-                      ('bucket_start','timestamp'),
-                      ('bucket_end','timestamp'),
-                      ('bucket_duration_hours','nullable(int)'),
-                      ('updated_at','nullable(timestamp)'),
-                      ('dimension','nullable(string)'),
-                      ('dimension_value','nullable(string)'),
-                      ('metric_properties','string')]
-    %}
-    {% if with_created_at %}
-        {% do columns.append(('created_at','nullable(timestamp)')) %}
-    {% endif %}
-    {{ elementary.empty_table(columns) }}
-{% endmacro %}
 
 {% macro empty_schema_columns_snapshot() %}
     {{ elementary.empty_table([('column_state_id','string'),('full_column_name','string'),('full_table_name','string'),('column_name','string'),('data_type','string'),('is_new','boolean'),('detected_at','timestamp'),('created_at','timestamp')]) }}
@@ -149,14 +124,6 @@
         cast({{ dummy_values['float'] }} as {{ elementary.edr_type_float() }}) as {{ column_name }}
     {%- elif data_type == 'long_string' %}
         cast('{{ dummy_values['long_string'] }}' as {{ elementary.edr_type_long_string() }}) as {{ column_name }}
-    {%- elif data_type == 'nullable(string)' %}
-        cast('{{ dummy_values['string'] }}' as Nullable({{ elementary.edr_type_string() }})) as {{ column_name }}
-    {%- elif data_type == 'nullable(timestamp)' -%}
-        cast('{{ dummy_values['timestamp'] }}' as Nullable({{ elementary.edr_type_timestamp() }})) as {{ column_name }}
-    {%- elif data_type == 'nullable(float)' -%}
-        cast({{ dummy_values['float'] }} as Nullable({{ elementary.edr_type_float() }})) as {{ column_name }}
-    {%- elif data_type == 'nullable(int)' -%}
-        cast({{ dummy_values['int'] }} as Nullable({{ elementary.edr_type_int() }})) as {{ column_name }}
     {%- else %}
         cast('{{ dummy_values['string'] }}' as {{ elementary.edr_type_string() }}) as {{ column_name }}
     {%- endif %}
@@ -164,11 +131,7 @@
 {% endmacro %}
 
 
-{%- macro dummy_values() -%}
-    {{ return(adapter.dispatch('dummy_values', 'elementary')()) }}
-{%- endmacro -%}
-
-{% macro default__dummy_values() %}
+{% macro dummy_values() %}
 
     {%- set dummy_values = {
      'string': "dummy_string",
@@ -178,22 +141,6 @@
      'bigint': 31474836478,
      'float': 123456789.99,
      'timestamp': "2091-02-17"
-    } %}
-
-    {{ return(dummy_values) }}
-
-{% endmacro %}
-
-{% macro fabric__dummy_values() %}
-
-    {%- set dummy_values = {
-     'string': "dummy_string",
-     'long_string': "this_is_just_a_long_dummy_string",
-     'boolean': '1',
-     'int': 123456789,
-     'bigint': 31474836478,
-     'float': 123456789.99,
-     'timestamp': "2063-04-05"
     } %}
 
     {{ return(dummy_values) }}

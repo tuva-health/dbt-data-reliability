@@ -22,9 +22,6 @@
     cast(current_timestamp() as timestamp)
 {% endmacro %}
 
-{% macro clickhouse__edr_current_timestamp() %}
-    now()
-{% endmacro %}
 
 {% macro edr_current_timestamp_in_utc() -%}
     {{ adapter.dispatch('edr_current_timestamp_in_utc','elementary')() }}
@@ -50,10 +47,6 @@
     cast(unix_timestamp() as timestamp)
 {% endmacro %}
 
-{% macro clickhouse__edr_current_timestamp_in_utc() %}
-    now('UTC')
-{% endmacro %}
-
 {% macro athena__edr_current_timestamp() -%}
     CURRENT_TIMESTAMP
 {%- endmacro -%}
@@ -69,11 +62,3 @@
 {% macro trino__edr_current_timestamp_in_utc() -%}
     cast(current_timestamp at time zone 'UTC' as timestamp(6))
 {%- endmacro -%}
-
-{% macro fabric__edr_current_timestamp() %}
-    cast(current_timestamp as datetime2)
-{% endmacro %}
-
-{% macro fabric__edr_current_timestamp_in_utc() %}
-    cast(sysutcdatetime() as datetime2)
-{% endmacro %}
