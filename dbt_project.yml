@@ -24,6 +24,6 @@ clean-targets: # directories to be removed by `dbt clean`
   - "dbt_modules"
 
 on-run-start:
-  - "{{ elementary.on_run_start() if target.type != 'fabric' }}"
+  - "{{ elementary.on_run_start() }}"
 on-run-end:
-  - "{{ elementary.on_run_end() if target.type != 'fabric' }}"
+  - "{{ elementary.on_run_end() }}"
